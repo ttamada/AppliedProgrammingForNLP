@@ -1,29 +1,9 @@
-# VTK Git Repository
+# Applied Programming for NLP
 
-## Group Members
+## Link 
+http://www.cis.uni-muenchen.de/~davidk/ap/
 
-* Tetsuhiro Tamada
-* Karsten Schick
+## Team members
 * Valentin Deyringer
+* Karsten Schick
 
-## Exercise 01
-
-To run the famous 'hello world' program run the shell script ex_01.sh in /bin
-
-    $ ./ex_01.sh
-
-## Exercise 02
-
-Description missing
-
-## Exercise 03
-
-To create the (full) corpus, vocab and pos files run appropriate command:
-
-* ap full_corpus
-* ap full_vocab
-* ap full_pos
-
-## Exercise 04
-
-new targets added
