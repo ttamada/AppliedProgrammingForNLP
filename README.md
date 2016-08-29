@@ -3,7 +3,7 @@
 ## Link 
 http://www.cis.uni-muenchen.de/~davidk/ap/
 
-## Team members
+## Team Members
 * Valentin Deyringer
 * Karsten Schick
 
