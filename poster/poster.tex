@@ -1,0 +1,491 @@
+\documentclass[a0,boxedsections,landscape]{sciposter}
+
+
+\usepackage{etex}
+
+\usepackage[utf8]{inputenc}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{sectionbox}
+\usepackage[pdftex]{graphicx}
+\usepackage{rotating}
+\usepackage{url}
+\usepackage[position=bottom]{subfig}
+% Bildchen
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-blur}
+\usepackage{graphicx}
+%\usepackage{tabu}
+%\usepackage{algorithmicx}
+%\usepackage{algpseudocode}
+
+\usepackage{arydshln}
+\usepackage{mathdots}
+\usepackage{enumerate}
+\usepackage[inline]{enumitem}
+
+\definecolor{TitleCol}{rgb}{0,0.47,0.23}
+\definecolor{BoxCol}{rgb}{0,0.47,0.23}
+\definecolor{SectionCol}{rgb}{1,1,1}
+%\definecolor{Gray}{gray}{0.75}
+%\definecolor{HighlightColor}{gray}{0.95}
+\newcommand{\hl}[1]{{\bf\color{TitleCol} #1}}
+\definecolor{BackCol}{rgb}{0.7,0.9,0.7}
+
+\renewcommand{\titlesize}{\Huge\color{TitleCol}}
+\renewcommand{\sectionsize}{\Large}
+\renewcommand{\authorsize}{\Large}
+\renewcommand{\instsize}{\large}
+
+\newcommand{\bftab}{\fontseries{b}\selectfont}
+%\newcommand{\todo}[1]{\textcolor{red}{\textbf{TODO}: \emph{#1}}}
+\newcommand{\todo}[1]{}
+
+%\def\xstrut{\raisebox{-.4\height}{\rule{0pt}{2cm}}} 
+
+
+
+\usepackage{listliketab}
+\usepackage{color}
+\usepackage{nameref}
+\usepackage{pgfplots}
+
+\newcommand*{\secref}[1]{\ref{#1} \nameref{#1}}
+
+
+\title{Dream Machine}
+
+\author{ap-VTK \\ Tetsuhiro Tamada, Valentin Deyringer}
+
+\date{\today}
+
+\institute{
+Center for Information and Language Processing, University of Munich, Germany
+}
+
+\email{{\tt Tetsuhiro.Tamada@campus.lmu.de,
+            v.deyringer@campus.lmu.de}}
+
+%\setlength{\logowidth}{0.25\textheight}
+
+\leftlogo[2]{logo.pdf}
+\norightlogo{}
+%\rightlogo[1]{cislogo.png}
+
+\setmargins[4cm] 
+
+\begin{document}
+
+\conference{Applied Programming - Spring 2015}
+
+\maketitle
+
+%\let\thefootnote\relax\footnotetext{}
+
+\setlength{\columnseprule}{0pt}
+\begin{multicols}{3}
+
+
+\section{Introduction}
+\begin{itemize}
+  
+    \item The task was to build a \textbf{Dream Machine} which automatically generates Text.
+    
+    \item Our system generated \textbf{sentences one by one}.
+    
+    \item As data basis we used the \textbf{Wall Street Journal Corpus}. %TODO: link or cite
+  
+    \item To measure the quality we used the measure of \textbf{perplexity}.
+  
+%    \item Results were bad, see \secref{sec:text_generation} and \secref{sec:evaluation} for details.
+  
+    \item We chose \textbf{Python 2.7} as our programming language because it offers convenient ways to implement the underlying procedures and fast enough computation.
+  
+\end{itemize}
+
+
+\section{Preprocessing}
+
+\begin{itemize}
+
+    \item Not much preprocessing was necessary, since the provided corpus was already edited very well following the \textbf{Penn Treebank Tokenization guidelines}\footnote{https://www.cis.upenn.edu/~treebank/tokenization.html}.
+    
+    \item \textbf{Sentence segmentation} was not an issue as sentences were separated by line breaks.
+    
+    \item The step of \textbf{tokenization} also presented no problems and could be implemented easily by splitting a sentence at white spaces.
+    
+    \item A few \textbf{tags} resembling different kinds of brackets were \textbf{replaced}.\\
+    {\small(\verb+-LRB-+, \verb+-RRB-+, \verb+-LSB-+, \verb+-RSB-+, \verb+-LCB-+, \verb+-RCB-+)}
+    
+    \item To model the \textbf{start and end of a sentence} we added the tags \verb+<s>+ and \verb+<\s>+.
+    
+    \item As optional step we implemented a switch to covert the whole text into \textbf{lower case}.
+    
+\end{itemize}
+
+
+\section{Text Generation}
+
+\begin{itemize}
+
+    \item A \textbf{language model} describes word probabilities in a given language.
+
+    \item Optimally language models are trained on \textbf{large and diverse} corpora.
+    
+    \item The \textbf{probability of a word sequence} is given by:
+    
+    \begin{equation}
+        P(w_1, \dots, w_n) = \prod^n_{i=1}P(w_i|w_1, \dots, w_{n-1})
+    \end{equation}
+    
+    \item In an \textbf{ngram model} word probabilities rely only on the $n-1$ preceding words:
+    
+    %can be calculated by the counts of the ngram in question devided by the counts of all ngrams starting with sequence $w_{i-(n-1)},\dots,w_{i-1}$
+    
+    \begin{equation}
+    \label{eq:wprob}
+        P(w_i|w_{i-(n-1)},\dots,w_{i-1}) = \frac{count(w_{i-(n-1)},\dots,w_{i})}{count(w_{i-(n-1)},\dots,w_{i-1})}
+    \end{equation}
+    
+    \item To generate a sentence we \textbf{start with the sentence start tag} \verb+<s>+.
+    
+    \item The probabilities of \textbf{all possible following words} are then calculated with equation~\ref{eq:wprob}.
+    
+    \item One of the possible words is then selected by a \textbf{weighted random choice} and appended to the existing word sequence.
+    
+    \item This procedure is continued \textbf{until the sentence end tag} \verb+<\s>+ is reached which means that the sentence is generated.
+
+\end{itemize}
+
+%\textcolor{red}{\textbf{\underline{PROBLEM}}} Smoothing in generation $\Rightarrow$ runs into never seen sequences and therefore the probability of reaching an sentence end tag \verb+<\s>+ is $\frac{1}{N}$ where $N$ is the size of the vocabulary.\\
+
+\section{Evaluation}
+\label{sec:evaluation}
+
+\begin{itemize}
+    \item How likely does the generated sentence in test corpus occur? Which model generates the best sentence?
+    \item Generated sentences through bigram and trigram model reached especially a better score
+    \item Nomalization of train and test corpus to lower case was useful
+    \item Perplexity calculation in Log Space:
+    
+    \begin{equation}
+        PP(S) = 2^{-1/N\sum_{n=1}^{N}\log_2P(w_i|w_1^{i-1})}
+    \end{equation}
+    
+    \item The smaller perplexity a sentence has, the more likely it appears in test corpus
+    \item Result:\\
+        y-axis: perplexity\\
+        x-axis: n\\
+\end{itemize}
+
+
+\begin{figure}[htp]
+
+%first plot
+    \begin{minipage}{0,49\textwidth}
+        \begin{tikzpicture}[scale=1.9]
+            \begin{axis}[
+                    xlabel=n,
+                    ylabel=Perplexity,
+                    ymin=500,
+                    ymax=6000,
+                    scaled y ticks ={base 10:-3},
+                    ytick={1000,3000,5000},
+                    yticklabel shift={-.1cm},
+                    xmin=0.75,
+                    xmax=6.25,
+                    xtick={1,2,3,4,5},
+                    xticklabel shift={-.15cm}
+                    ]
+                %n = 1: PP = ??
+                %n = 2: PP = ??
+                %n = 3: PP = ??
+                %n = 4: PP = ??
+                %n = 5: PP = ??
+                %n = 6: PP = ??
+                \addplot+[sharp plot] coordinates
+                {(1,5968.9540787) (2,2843.32773147) (3,4172.27836011) (4,4975.47784108) (5,4582.96593799)};
+                \addplot+[sharp plot] coordinates
+                {(1,6618.32536739) (2,4824.99355692) (3,4778.49141844) (4,4699.47676753) (5,5424.07385228)};
+            \end{axis}
+        \end{tikzpicture}
+        
+        {\small using \textbf{trigram} model for the calculation, with \textbf{50}\% of test data vocab as unknown, averaged  over 10 sents\\
+        \textcolor{blue}{blue: }normalized to lowercase\\
+         \textcolor{red}{red: }not normalized to lowercase}
+    \end{minipage}\hfill
+%second plot
+    \begin{minipage}{0,49\textwidth}
+        \begin{tikzpicture}[scale=1.9]
+            \begin{axis}[
+                    xlabel=n,
+                    ylabel=Perplexity,
+                    ymin=500,
+                    ymax=6000,
+                    scaled y ticks ={base 10:-3},
+                    ytick={1000,3000,5000},
+                    yticklabel shift={-.1cm},
+                    xmin=0.75,
+                    xmax=6.25,
+                    xtick={1,2,3,4,5},
+                    xticklabel shift={-.15cm}
+                    ]
+                %n = 1: PP = ??
+                %n = 2: PP = ??
+                %n = 3: PP = ??
+                %n = 4: PP = ??
+                %n = 5: PP = ??
+                %n = 6: PP = ??
+                \addplot+[sharp plot] coordinates
+                {(1,6036.87327609) (2,4895.35592416) (3,4121.69082338) (4,4693.90850676) (5,5265.39871434)};
+                \addplot+[sharp plot] coordinates
+                {(1,6748.2442336) (2,5687.76398186) (3,4202.85120339) (4,4712.2955876) (5,4702.74784096)};
+            \end{axis}
+        \end{tikzpicture}
+        
+        {\small using \textbf{trigram} model for the calculation, with \textbf{25}\% of test data vocab as unknown, averaged over 10 sents\\
+        \textcolor{blue}{blue: }normalized to lowercase\\
+         \textcolor{red}{red: }not normalized to lowercase}
+        
+    \end{minipage}%\hfill
+%third plot
+%    \begin{minipage}{0,32\textwidth}
+%        \begin{tikzpicture}
+%            \begin{axis}[
+%                    xlabel=n,
+%                    ylabel=Perplexity,
+%                    ymin=500,
+%                    ymax=6000,
+%                    scaled y ticks ={base 10:-3},
+%                    ytick={1000,3000,5000},
+%                    yticklabel shift={-.1cm},
+%                    xmin=0.75,
+%                    xmax=5.25,
+%                    xtick={1,2,3,4,5},
+%                    xticklabel shift={-.15cm}
+%                    ]
+%                %n = 1: PP = ??
+%                %n = 2: PP = ??
+%                %n = 3: PP = ??
+%                %n = 4: PP = ??
+%                %n = 5: PP = ??
+%                \addplot+[sharp plot] coordinates
+%                {(1,0) (2,0) (3,0) (4,0) (5,0)};
+%            \end{axis}
+%        \end{tikzpicture}
+%        
+%        {\small with 75\% of test data vocab as unknown, averaged over 100 sents and lower case}
+%    \end{minipage}
+    
+    %TODO: generate with different n but calculate PP with same n (3?)
+
+\end{figure}
+
+\begin{figure}[htp]
+
+%first plot
+    \begin{minipage}{0,49\textwidth}
+        \begin{tikzpicture}[scale=1.9]
+            \begin{axis}[
+                    xlabel=n,
+                    ylabel=Perplexity,
+                    ymin=500,
+                    ymax=6000,
+                    scaled y ticks ={base 10:-3},
+                    ytick={1000,3000,5000},
+                    yticklabel shift={-.1cm},
+                    xmin=0.75,
+                    xmax=6.25,
+                    xtick={1,2,3,4,5},
+                    xticklabel shift={-.15cm}
+                    ]
+                %n = 1: PP = ??
+                %n = 2: PP = ??
+                %n = 3: PP = ??
+                %n = 4: PP = ??
+                %n = 5: PP = ??
+                %n = 6: PP = ??
+                \addplot+[sharp plot] coordinates
+                {(1,5433.9784992) (2,1581.22118621) (3,1442.98352364) (4,1674.27696085) (5,1915.91470073)};
+                \addplot+[sharp plot] coordinates
+                {(1,3748.96377579) (2,1781.9044924) (3,2184.2025088) (4,2315.92724852) (5,2314.05840056)};
+            \end{axis}
+        \end{tikzpicture}
+        
+        {\small using \textbf{bigram} model for the calculation, with \textbf{50}\% of test data vocab as unknown, averaged  over 10 sents\\
+        \textcolor{blue}{blue: }normalized to lowercase\\
+         \textcolor{red}{red: }not normalized to lowercase}
+    \end{minipage}\hfill
+%second plot
+    \begin{minipage}{0,49\textwidth}
+        \begin{tikzpicture}[scale=1.9]
+            \begin{axis}[
+                    xlabel=n,
+                    ylabel=Perplexity,
+                    ymin=500,
+                    ymax=6000,
+                    scaled y ticks ={base 10:-3},
+                    ytick={1000,3000,5000},
+                    yticklabel shift={-.1cm},
+                    xmin=0.75,
+                    xmax=6.25,
+                    xtick={1,2,3,4,5},
+                    xticklabel shift={-.15cm}
+                    ]
+                %n = 1: PP = ??
+                %n = 2: PP = ??
+                %n = 3: PP = ??
+                %n = 4: PP = ??
+                %n = 5: PP = ??
+                %n = 6: PP = ??
+                \addplot+[sharp plot] coordinates
+                {(1,3970.11202767) (2,2129.7515771) (3,1191.40956061) (4,1688.33961943) (5,1861.57150571)};
+                \addplot+[sharp plot] coordinates
+                {(1,4404.32958687) (2,1569.34410073) (3,1697.00181736) (4,2617.01037282) (5,2827.51752667)};
+            \end{axis}
+        \end{tikzpicture}
+        
+        {\small using \textbf{bigram} model for the calculation, with \textbf{25}\% of test data vocab as unknown, averaged over 10 sents\\
+        \textcolor{blue}{blue: }normalized to lowercase\\
+         \textcolor{red}{red: }not normalized to lowercase}
+        
+    \end{minipage}%\hfill
+%third plot
+%    \begin{minipage}{0,32\textwidth}
+%        \begin{tikzpicture}
+%            \begin{axis}[
+%                    xlabel=n,
+%                    ylabel=Perplexity,
+%                    ymin=500,
+%                    ymax=6000,
+%                    scaled y ticks ={base 10:-3},
+%                    ytick={1000,3000,5000},
+%                    yticklabel shift={-.1cm},
+%                    xmin=0.75,
+%                    xmax=5.25,
+%                    xtick={1,2,3,4,5},
+%                    xticklabel shift={-.15cm}
+%                    ]
+%                %n = 1: PP = ??
+%                %n = 2: PP = ??
+%                %n = 3: PP = ??
+%                %n = 4: PP = ??
+%                %n = 5: PP = ??
+%                \addplot+[sharp plot] coordinates
+%                {(1,0) (2,0) (3,0) (4,0) (5,0)};
+%            \end{axis}
+%        \end{tikzpicture}
+%        
+%        {\small with 75\% of test data vocab as unknown, averaged over 100 sents and lower case}
+%    \end{minipage}
+    
+    %TODO: generate with different n but calculate PP with same n (3?)
+
+\end{figure}
+
+
+    
+% (siehe 2 noch offene Issues im GitLab) + Dokumentation, dass die beim Korrigieren auch wissen, was da passiert. Hier wäre z.B. interessant 1) was passiert, wenn ich ein x-gram Modell zur Textgenerierung nutze und ein y-gram Model zur Evaluierung 2) welche Auswirkung hat der Prozentsatz des Vokabulars das beim Testen als unknown betrachtet wird 3) bringt lower-case Switch etwas?
+%    Vielleicht möchte ja einer ein Evaluierungs-Script schreiben, dass hier verschiedene Möglichkeiten testet}
+
+\section{Program / Code}
+
+\begin{itemize}
+
+    \item Python 2.7
+
+    \item Apart from numpy\footnote{http://www.numpy.org/} which offers a better "random choice" no third party libraries were used
+
+   \item Execution:
+    \begin{itemize}
+        \item Options:\\[.5ex]
+        \begin{listliketab}
+            \begin{tabular}{ll}
+                \verb+-h+ & shows help \\
+                \verb+-n N+ & order of ngram model to use \\
+                \verb+-l+ / \verb+--lower+ & normalize text to lower case \\
+                \verb+-s+ & number of sentences to generate \\
+            \end{tabular}
+        \end{listliketab}
+        \item example program call: \\
+            \verb+./src/dream_machine.py -n 3 -l -s 5 res/wsj/train-wsj-00-20.sent > generated_sents.txt+
+        
+    \end{itemize}
+    
+    \item evaluation
+    
+    \begin{itemize}
+        \item Options:
+        \begin{listliketab}
+            \begin{tabular}{ll}
+                \verb+-h+ & shows help \\
+                \verb+-n N+ & order of ngram model to use \\
+                \verb+-l+ / \verb+--lower+ & normalize text to lower case \\
+                \verb+-u+ & fraction of words to treat as unknown \\
+            \end{tabular}
+        \end{listliketab}
+        \item example program call: \\
+            \verb+./src/dream_machine_test.py -n 3 -l -u 0.5 generated_sents.txt res/wsj/test-wsj-23-24.sent+
+    \end{itemize}
+    
+\end{itemize}
+
+% section 
+
+\begin{itemize}
+
+    \item Options:\\[.5ex]
+    \begin{listliketab}
+        \begin{tabular}{ll}
+            \verb+-h+ & shows help \\
+            \verb+-n N+ & order of ngram model to use \\
+            \verb+-l+ / \verb+--lower+ & normalize text to lower case \\
+            \verb+-s+ & number of sentences to generate \\
+        \end{tabular}
+    \end{listliketab}
+    \item example program call to generate text: \\
+        \verb+./src/dream_machine.py -n 3 -l -s 5 res/wsj/train-wsj-00-20.sent+
+
+\end{itemize}
+
+
+\section{Future Work}
+
+\begin{itemize}
+    
+    %\item solve smoothing problem in generation    
+    
+    \item \textbf{Interpolation} could be used by incorporating lower order ngram models to adjust the probabilities of possibly selected words.
+
+    \item By adding more \textbf{linguistic knowledge} the generation models could be improved further.
+
+    \begin{itemize}
+        \item Tuning probabilities by taking into account the probabilities of \textbf{part of speech tag sequences}.
+    \end{itemize}
+    
+    \item Check output for \textbf{grammaticality} with grammar rules.
+    
+    \item To evaluate the output \textbf{other evaluation metrics} like could be used\\
+    \small{(taking into account some specifics)}
+    
+    \begin{itemize}
+
+        \item BLEU score \cite{papineni2002bleu} % TODO: (smoothed) \cite{lin2004automatic}
+
+        \item Word Error Rate
+
+    \end{itemize}
+
+\end{itemize}
+
+\bibliographystyle{plain}
+\bibliography{bibliography.bib}
+
+\end{multicols}
+
+\end{document}

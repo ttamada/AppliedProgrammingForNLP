@@ -1,0 +1,15 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# tmp files
+*~
+
+# res files
+res/
+
+#lib files
+lib/
+
+# PyCharm project folder
+.idea/

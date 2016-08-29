@@ -1,0 +1,3 @@
+Perplexity for unigram model (averaged over sentences): 224.416895825
+Perplexity for bigram model (averaged over sentences): 1.07008981846
+Perplexity for trigram model (averaged over sentences): 1.05190057624

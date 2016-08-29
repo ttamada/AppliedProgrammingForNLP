@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Cheap wrapper around the ugly makefile syntax.
+# Remember we want to hide the tools we use from the end user.
+
+help="Usage: ap [corpus|vocab|pos]"
+
+# Print help
+[[ -z "$@" || "$@" == "?" ]] && echo "$help" && exit 1
+
+# Get the directory of this script.
+basedir=$(dirname $0)
+
+# Retrieve the make command from the arguments.
+cmd=$1; shift
+
+cd "$basedir/.." && make "$cmd"
